@@ -46,6 +46,10 @@ data("instacart")
     arrange(desc(num))
     
  aisels_df2 %>% 
+   mutate(
+     aisle = factor(aisle),
+     aisle = fct_reorder(aisle, num)
+   ) %>% 
  ggplot(aes(x = aisle, y = num)) + 
   geom_point() + 
   labs(
@@ -53,8 +57,7 @@ data("instacart")
     x = "aisles",
     y = "number of item",
     ) +
-    geom_text(label = pull(aisels_df2, aisle), nudge_x = 0.25, nudge_y = 0.25, check_overlap = T)+
-   theme(axis.text.x=element_blank())
+   theme(axis.text.x=element_text(angle = 90, vjust = 0.5, hjust = 1))
     
 # most popular product in each aisle
  aisels_df3 = 
@@ -88,5 +91,93 @@ hour_df %>%
   knitr::kable()
   
 ```
-There are 134 aisles and the fresh vegetables aisle is the where most items are ordered from.
+
+There are 134 aisles and the _fresh vegetables aisle_ is the where most items are ordered from.
+
+# Problem 2
+
+
+```{r}
+
+data("brfss_smart2010")
+#clean variable names
+brfss_smart2010_1=
+ brfss_smart2010 %>% 
+  rename(
+    State = Locationabbr,
+    Location = Locationdesc
+  )
+
+#subset a new data set brfss_df_1
+brfss_df_1 = 
+  brfss_smart2010_1 %>% 
+  filter(Topic == "Overall Health") %>% 
+  filter(Response %in% c("Excellent","Very good","Good","Fair","Poor")) %>% 
+  mutate(Response = as.factor(Response)) %>% 
+  mutate(Response = factor(Response, levels = c("Poor", "Fair", "Good","Very good","Excellent")))
+
+#In 2002, which states were observed at 7 or more locations? What about in 2010?
+#2002
+#group by doesn't work
+ brfss_df_2 = 
+   brfss_df_1 %>% 
+   filter(Year == 2002) %>% 
+   group_by(State) %>%
+  summarize(loc_num = n())
+
+brfss_df_2 = 
+  brfss_df_1 %>% 
+  filter(Year == 2002) %>% 
+  group_by(State) %>%
+  summarize(loc_num = n())%>% 
+  filter(loc_num >= 7)
+
+#2010
+brfss_df_3 = 
+  brfss_df_1 %>% 
+  filter(Year == 2010) %>% 
+  group_by(State) %>%
+  summarize(loc_num = n())%>% 
+  filter(loc_num >= 7)
+#states in 2002
+states_2002 = pull(brfss_df_2,State)
+
+states_2010 = pull(brfss_df_3,State)
+
+#answer only Excellent
+brfss_df_4 = 
+  brfss_df_1 %>% 
+  filter(Response == "Excellent") %>% 
+  group_by(Year,State) %>% 
+mutate(
+  mean_value = mean(Data_value,na.rm = T)) %>% 
+  select(Year, State, mean_value) %>% 
+  distinct() %>% 
+  arrange(Year)
+ 
+#plot
+brfss_df_4 %>% 
+  ggplot(aes(x = Year, y = mean_value, color = State))+
+  geom_line()+
+  theme(legend.position = "right")
+
+#Make a two-panel plot showing, for the years 2006, and 2010, distribution of data_value for responses (“Poor” to “Excellent”) among locations in NY State
+ 
+
+brfss_df_5 =
+  brfss_df_1 %>% 
+  filter(Year %in% c(2006,2010)) %>% 
+  filter(State == "NY")
+
+
+brfss_df_5 %>% 
+ggplot(aes(x = Location , y = Data_value))+
+  geom_point()+
+  facet_grid(.~ Year)+
+   theme(axis.text.x=element_text(angle = 60, vjust = 0.5, hjust = 1))# response?
+
+  
+  
+  
+```
 
