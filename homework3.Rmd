@@ -179,5 +179,20 @@ ggplot(aes(x = Location , y = Data_value))+
   
   
   
+
+```
+
+# Probelm 3
+
+```{r}
+ACC_df = read_csv("./homework3_files/accel_data.csv")
+
+ACC_df1 =
+  ACC_df %>% 
+  janitor::clean_names() %>%
+  rename(id = day_id) %>% 
+  mutate(weekdays = ifelse(day %in% c("Monday","Tuesday","Wednesday","Thursday","Friday"),"Weekday","Weekend"))
+
+ACC_df1[,"weekdays"]
 ```
 
