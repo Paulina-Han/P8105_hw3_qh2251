@@ -191,8 +191,57 @@ ACC_df1 =
   ACC_df %>% 
   janitor::clean_names() %>%
   rename(id = day_id) %>% 
-  mutate(weekdays = ifelse(day %in% c("Monday","Tuesday","Wednesday","Thursday","Friday"),"Weekday","Weekend"))
+  mutate(weekdays = ifelse(day %in% c("Monday","Tuesday","Wednesday","Thursday","Friday"),1,0)) #weekday=1,weekend=0
 
-ACC_df1[,"weekdays"]
+obs = nrow(ACC_df1)
+col = ncol(ACC_df1)
+
 ```
+
+**Description**
+
+There are `r obs` observation in this data set which represent the days when the data were collected. There are `r col` variables which includes `week` variable indicating the number of week and `id` variable indicating the number of days. The `day` variable represent the week names of the day. Variable `activity_1` to `activity_1440` indicates the activity counts in every minute starting from midnight throughout the day. `weekdays` variable is a binary variable indicating if it is weekend or not by labeling weekdays as 1 and weekend as 0.
+
+```{r}
+# activity counts by day
+
+ACC_df2 =
+  ACC_df1 %>% 
+  mutate(total = rowSums(select(ACC_df1,activity_1:activity_1440))) %>% 
+  select(week,id,weekdays,day,total) 
+
+#table
+  knitr::kable(ACC_df2)
+
+```
+There aren't any apparent trend from this table.
+
+```{r}
+
+#plot #有问题
+
+Activity = 
+  ACC_df1 %>% 
+  select(activity_1:activity_1440) %>% 
+  t() %>% 
+  as.data.frame()
+
+time_of_the_day = as.vector(colnames(Activity))
+
+new_df = bind_cols(time_of_the_day,Acticity)
+
+day_of_the_week = ACC_df1 %>% 
+  select(day)
+
+colnames(new_df) = c("time", day_of_the_week)
+
+ 
+new_df %>% 
+ggplot(aes( x = time, color = day))+ 
+  geom_line()+
+  theme(legend.position = "right")
+
+
+```
+
 
