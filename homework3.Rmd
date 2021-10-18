@@ -64,9 +64,9 @@ data("instacart")
    instacart %>% 
    filter(aisle %in% c("baking ingredients","dog food care","packaged vegetables fruits")) %>% 
    group_by(aisle, product_name) %>% 
-   summarise(product_num = n()) %>% 
-   arrange(desc(product_num),.by_group = T) %>% 
-   slice_max(order_by = product_num,n = 3)  
+   summarise(order_count = n()) %>% 
+   arrange(desc(order_count),.by_group = T) %>% 
+   slice_max(order_by = order_count,n = 3)  
 
 #make a table
    aisels_df3 %>% 
@@ -77,7 +77,7 @@ hour_df =
   instacart %>% 
   filter(product_name %in% c("Pink Lady Apples","Coffee Ice Cream"))%>% 
   group_by(product_name,order_dow) %>% 
-  summarize(mean_order_time = round(mean(order_hour_of_day),2)) %>% 
+  summarize(mean_order_time = round(mean(order_hour_of_day))) %>% 
   pivot_wider(
     names_from = order_dow,
     values_from = mean_order_time
@@ -94,12 +94,19 @@ hour_df %>%
 
 There are 134 aisles and the _fresh vegetables aisle_ is the where most items are ordered from.
 
+From the plot we can see that fresh vegetables and fresh fruits are the 2 aisles where most items were order from and are way more than any other aisles.Packaged vegetables and fruits, yogurt,packaged cheese followed next.
+
+In the "baking ingredients aisles" light brown sugar is ordered the most. In the "dog food care" aisles Snack Sticks Chicken & Rice Recipe Dog Treats is ordered the most. In the "packaged fruits and vegetables" aisle Organic Baby Spinach is ordered th most.
+
+For Coffee Ice-cream, the order is slightly higher during the middle of the week, from Tuesday to Thursday. Pink Lady Apples are ordered the most on Wednesday.
+
 # Problem 2
 
 
 ```{r}
-
+#load the data
 data("brfss_smart2010")
+
 #clean variable names
 brfss_smart2010_1=
  brfss_smart2010 %>% 
@@ -118,13 +125,6 @@ brfss_df_1 =
 
 #In 2002, which states were observed at 7 or more locations? What about in 2010?
 #2002
-#group by doesn't work
- brfss_df_2 = 
-   brfss_df_1 %>% 
-   filter(Year == 2002) %>% 
-   group_by(State) %>%
-  summarize(loc_num = n())
-
 brfss_df_2 = 
   brfss_df_1 %>% 
   filter(Year == 2002) %>% 
@@ -139,9 +139,10 @@ brfss_df_3 =
   group_by(State) %>%
   summarize(loc_num = n())%>% 
   filter(loc_num >= 7)
+
 #states in 2002
 states_2002 = pull(brfss_df_2,State)
-
+#States in 2010
 states_2010 = pull(brfss_df_3,State)
 
 #answer only Excellent
@@ -159,32 +160,44 @@ mutate(
 brfss_df_4 %>% 
   ggplot(aes(x = Year, y = mean_value, color = State))+
   geom_line()+
+   labs(
+    title = "Average Prevalence",
+    x = "Year",
+    y = "Prevalence",
+    )+
   theme(legend.position = "right")
 
 #Make a two-panel plot showing, for the years 2006, and 2010, distribution of data_value for responses (“Poor” to “Excellent”) among locations in NY State
  
-
 brfss_df_5 =
   brfss_df_1 %>% 
   filter(Year %in% c(2006,2010)) %>% 
   filter(State == "NY")
 
-
 brfss_df_5 %>% 
-ggplot(aes(x = Location , y = Data_value))+
+ggplot(aes(x = Location , y = Data_value, color = Response))+
   geom_point()+
   facet_grid(.~ Year)+
-   theme(axis.text.x=element_text(angle = 60, vjust = 0.5, hjust = 1))# response?
-
-  
-  
-  
-
+   labs(
+    title = "Comparison of answers between 2006 and 2010 in New York",
+    x = "Locations",
+    y = "Prevalence",
+    )+
+   theme(axis.text.x=element_text(angle = 60, vjust = 0.5, hjust = 0.5), legend.position = "right")
 ```
+
+
+In 2002 `r states_2002` were observed in more than 7 locations. In 2010  `r states_2010` were observed in more than 7 locations.
+
+The average prevalence across different locations within a State with the answer "Excellent" was fluctuating between 20 to 25. And  West Virginia has a extreme low mean in 2005 compared to the other states and remained low in the following years.
+
+Comparing the prevalence in general between 2010 and 2006, we can see that most people answered "Very good" or "Good",only a small amount of people answered "Poor". There are slightly more people answered "Very good" in 2010 than 2006 and the prevalence for other answers stayed about the same.
+
+
 
 # Probelm 3
 
-```{r}
+```{r,warning=FALSE,message=FALSE}
 ACC_df = read_csv("./homework3_files/accel_data.csv")
 
 ACC_df1 =
@@ -214,34 +227,39 @@ ACC_df2 =
   knitr::kable(ACC_df2)
 
 ```
-There aren't any apparent trend from this table.
+There aren't any apparent trend we can see from this table.But we can see 2 Saturdays with extreme low activity count.
 
 ```{r}
 
-#plot #有问题
+#plot #x-labels
 
 Activity = 
   ACC_df1 %>% 
-  select(activity_1:activity_1440) %>% 
-  t() %>% 
-  as.data.frame()
+  select(day,activity_1:activity_1440) %>% 
+ pivot_longer(
+   activity_1:activity_1440,
+   names_to = "time",
+   names_prefix = "activity_",
+   values_to = "count"
+ ) %>% 
+  mutate(time = as.numeric(time))
 
-time_of_the_day = as.vector(colnames(Activity))
 
-new_df = bind_cols(time_of_the_day,Acticity)
 
-day_of_the_week = ACC_df1 %>% 
-  select(day)
-
-colnames(new_df) = c("time", day_of_the_week)
-
- 
-new_df %>% 
-ggplot(aes( x = time, color = day))+ 
-  geom_line()+
-  theme(legend.position = "right")
+Activity %>% 
+ggplot(aes( x = time, y = count, color = day))+ 
+  geom_line(alpha = 0.5)+ labs(
+    title = "Activity Count within a Day ",
+    x = "Time",
+    y = "Activity Count",
+    )+
+  theme(legend.position = "right")+
+  scale_x_continuous(
+    breaks = c(1,360,720,1080,1440),
+    labels = c("12AM", "6AM", "12PM", "6PM", "11:59PM")
+    )
 
 
 ```
 
-
+We can see that the activity count in every minute throughout the day is usually below 2500. The activity count at noon and evenings tends to peak compared to the other time of the day. 

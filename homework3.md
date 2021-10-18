@@ -80,9 +80,9 @@ data("instacart")
    instacart %>% 
    filter(aisle %in% c("baking ingredients","dog food care","packaged vegetables fruits")) %>% 
    group_by(aisle, product_name) %>% 
-   summarise(product_num = n()) %>% 
-   arrange(desc(product_num),.by_group = T) %>% 
-   slice_max(order_by = product_num,n = 3)  
+   summarise(order_count = n()) %>% 
+   arrange(desc(order_count),.by_group = T) %>% 
+   slice_max(order_by = order_count,n = 3)  
 ```
 
     ## `summarise()` has grouped output by 'aisle'. You can override using the `.groups` argument.
@@ -93,7 +93,7 @@ data("instacart")
     knitr::kable()
 ```
 
-| aisle                      | product\_name                                 | product\_num |
+| aisle                      | product\_name                                 | order\_count |
 |:---------------------------|:----------------------------------------------|-------------:|
 | baking ingredients         | Light Brown Sugar                             |          499 |
 | baking ingredients         | Pure Baking Soda                              |          387 |
@@ -111,7 +111,7 @@ hour_df =
   instacart %>% 
   filter(product_name %in% c("Pink Lady Apples","Coffee Ice Cream"))%>% 
   group_by(product_name,order_dow) %>% 
-  summarize(mean_order_time = round(mean(order_hour_of_day),2)) %>% 
+  summarize(mean_order_time = round(mean(order_hour_of_day))) %>% 
   pivot_wider(
     names_from = order_dow,
     values_from = mean_order_time
@@ -131,16 +131,32 @@ hour_df %>%
 
 | product\_name    | Sunday | Monday | Tuesday | Wednesday | Thursday | Friday | Saturday |
 |:-----------------|-------:|-------:|--------:|----------:|---------:|-------:|---------:|
-| Coffee Ice Cream |  13.77 |  14.32 |   15.38 |     15.32 |    15.22 |  12.26 |    13.83 |
-| Pink Lady Apples |  13.44 |  11.36 |   11.70 |     14.25 |    11.55 |  12.78 |    11.94 |
+| Coffee Ice Cream |     14 |     14 |      15 |        15 |       15 |     12 |       14 |
+| Pink Lady Apples |     13 |     11 |      12 |        14 |       12 |     13 |       12 |
 
 There are 134 aisles and the *fresh vegetables aisle* is the where most
 items are ordered from.
 
+From the plot we can see that fresh vegetables and fresh fruits are the
+2 aisles where most items were order from and are way more than any
+other aisles.Packaged vegetables and fruits, yogurt,packaged cheese
+followed next.
+
+In the “baking ingredients aisles” light brown sugar is ordered the
+most. In the “dog food care” aisles Snack Sticks Chicken & Rice Recipe
+Dog Treats is ordered the most. In the “packaged fruits and vegetables”
+aisle Organic Baby Spinach is ordered th most.
+
+For Coffee Ice-cream, the order is slightly higher during the middle of
+the week, from Tuesday to Thursday. Pink Lady Apples are ordered the
+most on Wednesday.
+
 # Problem 2
 
 ``` r
+#load the data
 data("brfss_smart2010")
+
 #clean variable names
 brfss_smart2010_1=
  brfss_smart2010 %>% 
@@ -159,13 +175,6 @@ brfss_df_1 =
 
 #In 2002, which states were observed at 7 or more locations? What about in 2010?
 #2002
-#group by doesn't work
- brfss_df_2 = 
-   brfss_df_1 %>% 
-   filter(Year == 2002) %>% 
-   group_by(State) %>%
-  summarize(loc_num = n())
-
 brfss_df_2 = 
   brfss_df_1 %>% 
   filter(Year == 2002) %>% 
@@ -180,9 +189,10 @@ brfss_df_3 =
   group_by(State) %>%
   summarize(loc_num = n())%>% 
   filter(loc_num >= 7)
+
 #states in 2002
 states_2002 = pull(brfss_df_2,State)
-
+#States in 2010
 states_2010 = pull(brfss_df_3,State)
 
 #answer only Excellent
@@ -200,6 +210,11 @@ mutate(
 brfss_df_4 %>% 
   ggplot(aes(x = Year, y = mean_value, color = State))+
   geom_line()+
+   labs(
+    title = "Average Prevalence",
+    x = "Year",
+    y = "Prevalence",
+    )+
   theme(legend.position = "right")
 ```
 
@@ -208,18 +223,154 @@ brfss_df_4 %>%
 ``` r
 #Make a two-panel plot showing, for the years 2006, and 2010, distribution of data_value for responses (“Poor” to “Excellent”) among locations in NY State
  
-
 brfss_df_5 =
   brfss_df_1 %>% 
   filter(Year %in% c(2006,2010)) %>% 
   filter(State == "NY")
 
-
 brfss_df_5 %>% 
-ggplot(aes(x = Location , y = Data_value))+
+ggplot(aes(x = Location , y = Data_value, color = Response))+
   geom_point()+
   facet_grid(.~ Year)+
-   theme(axis.text.x=element_text(angle = 60, vjust = 0.5, hjust = 1))# response?
+   labs(
+    title = "Comparison of answers between 2006 and 2010 in New York",
+    x = "Locations",
+    y = "Prevalence",
+    )+
+   theme(axis.text.x=element_text(angle = 60, vjust = 0.5, hjust = 0.5), legend.position = "right")
 ```
 
 <img src="homework3_files/figure-gfm/unnamed-chunk-3-2.png" width="90%" />
+
+In 2002 AZ, CO, CT, DE, FL, GA, HI, ID, IL, IN, KS, LA, MA, MD, ME, MI,
+MN, MO, NC, NE, NH, NJ, NV, NY, OH, OK, OR, PA, RI, SC, SD, TN, TX, UT,
+VT, WA were observed in more than 7 locations. In 2010 AL, AR, AZ, CA,
+CO, CT, DE, FL, GA, HI, IA, ID, IL, IN, KS, LA, MA, MD, ME, MI, MN, MO,
+MS, MT, NC, ND, NE, NH, NJ, NM, NV, NY, OH, OK, OR, PA, RI, SC, SD, TN,
+TX, UT, VT, WA, WY were observed in more than 7 locations.
+
+The average prevalence across different locations within a State with
+the answer “Excellent” was fluctuating between 20 to 25. And West
+Virginia has a extreme low mean in 2005 compared to the other states and
+remained low in the following years.
+
+Comparing the prevalence in general between 2010 and 2006, we can see
+that most people answered “Very good” or “Good”,only a small amount of
+people answered “Poor”. There are slightly more people answered “Very
+good” in 2010 than 2006 and the prevalence for other answers stayed
+about the same.
+
+# Probelm 3
+
+``` r
+ACC_df = read_csv("./homework3_files/accel_data.csv")
+
+ACC_df1 =
+  ACC_df %>% 
+  janitor::clean_names() %>%
+  rename(id = day_id) %>% 
+  mutate(weekdays = ifelse(day %in% c("Monday","Tuesday","Wednesday","Thursday","Friday"),1,0)) #weekday=1,weekend=0
+
+obs = nrow(ACC_df1)
+col = ncol(ACC_df1)
+```
+
+**Description**
+
+There are 35 observation in this data set which represent the days when
+the data were collected. There are 1444 variables which includes `week`
+variable indicating the number of week and `id` variable indicating the
+number of days. The `day` variable represent the week names of the day.
+Variable `activity_1` to `activity_1440` indicates the activity counts
+in every minute starting from midnight throughout the day. `weekdays`
+variable is a binary variable indicating if it is weekend or not by
+labeling weekdays as 1 and weekend as 0.
+
+``` r
+# activity counts by day
+
+ACC_df2 =
+  ACC_df1 %>% 
+  mutate(total = rowSums(select(ACC_df1,activity_1:activity_1440))) %>% 
+  select(week,id,weekdays,day,total) 
+
+#table
+  knitr::kable(ACC_df2)
+```
+
+| week |  id | weekdays | day       |     total |
+|-----:|----:|---------:|:----------|----------:|
+|    1 |   1 |        1 | Friday    | 480542.62 |
+|    1 |   2 |        1 | Monday    |  78828.07 |
+|    1 |   3 |        0 | Saturday  | 376254.00 |
+|    1 |   4 |        0 | Sunday    | 631105.00 |
+|    1 |   5 |        1 | Thursday  | 355923.64 |
+|    1 |   6 |        1 | Tuesday   | 307094.24 |
+|    1 |   7 |        1 | Wednesday | 340115.01 |
+|    2 |   8 |        1 | Friday    | 568839.00 |
+|    2 |   9 |        1 | Monday    | 295431.00 |
+|    2 |  10 |        0 | Saturday  | 607175.00 |
+|    2 |  11 |        0 | Sunday    | 422018.00 |
+|    2 |  12 |        1 | Thursday  | 474048.00 |
+|    2 |  13 |        1 | Tuesday   | 423245.00 |
+|    2 |  14 |        1 | Wednesday | 440962.00 |
+|    3 |  15 |        1 | Friday    | 467420.00 |
+|    3 |  16 |        1 | Monday    | 685910.00 |
+|    3 |  17 |        0 | Saturday  | 382928.00 |
+|    3 |  18 |        0 | Sunday    | 467052.00 |
+|    3 |  19 |        1 | Thursday  | 371230.00 |
+|    3 |  20 |        1 | Tuesday   | 381507.00 |
+|    3 |  21 |        1 | Wednesday | 468869.00 |
+|    4 |  22 |        1 | Friday    | 154049.00 |
+|    4 |  23 |        1 | Monday    | 409450.00 |
+|    4 |  24 |        0 | Saturday  |   1440.00 |
+|    4 |  25 |        0 | Sunday    | 260617.00 |
+|    4 |  26 |        1 | Thursday  | 340291.00 |
+|    4 |  27 |        1 | Tuesday   | 319568.00 |
+|    4 |  28 |        1 | Wednesday | 434460.00 |
+|    5 |  29 |        1 | Friday    | 620860.00 |
+|    5 |  30 |        1 | Monday    | 389080.00 |
+|    5 |  31 |        0 | Saturday  |   1440.00 |
+|    5 |  32 |        0 | Sunday    | 138421.00 |
+|    5 |  33 |        1 | Thursday  | 549658.00 |
+|    5 |  34 |        1 | Tuesday   | 367824.00 |
+|    5 |  35 |        1 | Wednesday | 445366.00 |
+
+There aren’t any apparent trend we can see from this table.But we can
+see 2 Saturdays with extreme low activity count.
+
+``` r
+#plot #x-labels
+
+Activity = 
+  ACC_df1 %>% 
+  select(day,activity_1:activity_1440) %>% 
+ pivot_longer(
+   activity_1:activity_1440,
+   names_to = "time",
+   names_prefix = "activity_",
+   values_to = "count"
+ ) %>% 
+  mutate(time = as.numeric(time))
+
+
+
+Activity %>% 
+ggplot(aes( x = time, y = count, color = day))+ 
+  geom_line(alpha = 0.5)+ labs(
+    title = "Activity Count within a Day ",
+    x = "Time",
+    y = "Activity Count",
+    )+
+  theme(legend.position = "right")+
+  scale_x_continuous(
+    breaks = c(1,360,720,1080,1440),
+    labels = c("12AM", "6AM", "12PM", "6PM", "11:59PM")
+    )
+```
+
+<img src="homework3_files/figure-gfm/unnamed-chunk-6-1.png" width="90%" />
+
+We can see that the activity count in every minute throughout the day is
+usually below 2500. The activity count at noon and evenings tends to
+peak compared to the other time of the day.
