@@ -30,6 +30,15 @@ scale_fill_discrete = scale_fill_viridis_d
 #load the data
 data("instacart")
 
+#illustrate
+head(instacart,8)
+
+```
+
+This instacart data set includes 1384617 observations and 15 variables. This data set includes the online shopping history in 2017. Some of the important varibales are `user_id` which is a identifier of customer,`product_name` is the name of their ordered product and `aisle` is where the product placed.For example this is the detail of the order with order id 1.
+
+
+```{r}
 # summary the aisles
  aisels_df1 = 
    instacart %>% 

@@ -42,6 +42,33 @@ scale_fill_discrete = scale_fill_viridis_d
 #load the data
 data("instacart")
 
+#illustrate
+head(instacart,8)
+```
+
+    ## # A tibble: 8 x 15
+    ##   order_id product_id add_to_cart_order reordered user_id eval_set order_number
+    ##      <int>      <int>             <int>     <int>   <int> <chr>           <int>
+    ## 1        1      49302                 1         1  112108 train               4
+    ## 2        1      11109                 2         1  112108 train               4
+    ## 3        1      10246                 3         0  112108 train               4
+    ## 4        1      49683                 4         0  112108 train               4
+    ## 5        1      43633                 5         1  112108 train               4
+    ## 6        1      13176                 6         0  112108 train               4
+    ## 7        1      47209                 7         0  112108 train               4
+    ## 8        1      22035                 8         1  112108 train               4
+    ## # ... with 8 more variables: order_dow <int>, order_hour_of_day <int>,
+    ## #   days_since_prior_order <int>, product_name <chr>, aisle_id <int>,
+    ## #   department_id <int>, aisle <chr>, department <chr>
+
+This instacart data set includes 1384617 observations and 15 variables.
+This data set includes the online shopping history in 2017. Some of the
+important varibales are `user_id` which is a identifier of
+customer,`product_name` is the name of their ordered product and `aisle`
+is where the product placed.For example this is the detail of the order
+with order id 1.
+
+``` r
 # summary the aisles
  aisels_df1 = 
    instacart %>% 
@@ -72,7 +99,7 @@ data("instacart")
    theme(axis.text.x=element_text(angle = 90, vjust = 0.5, hjust = 1))
 ```
 
-<img src="homework3_files/figure-gfm/unnamed-chunk-2-1.png" width="90%" />
+<img src="homework3_files/figure-gfm/unnamed-chunk-3-1.png" width="90%" />
 
 ``` r
 # most popular product in each aisle
@@ -218,7 +245,7 @@ brfss_df_4 %>%
   theme(legend.position = "right")
 ```
 
-<img src="homework3_files/figure-gfm/unnamed-chunk-3-1.png" width="90%" />
+<img src="homework3_files/figure-gfm/unnamed-chunk-4-1.png" width="90%" />
 
 ``` r
 #Make a two-panel plot showing, for the years 2006, and 2010, distribution of data_value for responses (“Poor” to “Excellent”) among locations in NY State
@@ -240,7 +267,7 @@ ggplot(aes(x = Location , y = Data_value, color = Response))+
    theme(axis.text.x=element_text(angle = 60, vjust = 0.5, hjust = 0.5), legend.position = "right")
 ```
 
-<img src="homework3_files/figure-gfm/unnamed-chunk-3-2.png" width="90%" />
+<img src="homework3_files/figure-gfm/unnamed-chunk-4-2.png" width="90%" />
 
 In 2002 AZ, CO, CT, DE, FL, GA, HI, ID, IL, IN, KS, LA, MA, MD, ME, MI,
 MN, MO, NC, NE, NH, NJ, NV, NY, OH, OK, OR, PA, RI, SC, SD, TN, TX, UT,
@@ -369,7 +396,7 @@ ggplot(aes( x = time, y = count, color = day))+
     )
 ```
 
-<img src="homework3_files/figure-gfm/unnamed-chunk-6-1.png" width="90%" />
+<img src="homework3_files/figure-gfm/unnamed-chunk-7-1.png" width="90%" />
 
 We can see that the activity count in every minute throughout the day is
 usually below 2500. The activity count at noon and evenings tends to
